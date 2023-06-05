@@ -1,0 +1,40 @@
+version: "3"
+services:
+  web:
+    build: .
+    volumes:
+      - static:/webpage/static
+      - media:/webpage/media
+      - .:/webpage
+    depends_on:
+      - db
+    environment:
+      - VIRTUAL_HOST=${DOMAIN},www.${DOMAIN}
+      - VIRTUAL_PORT=8069
+      - LETSENCRYPT_HOST=${DOMAIN},www.${DOMAIN}
+      - LETSENCRYPT_EMAIL=${CONTACT}
+    networks:
+      - nginx-proxy
+      - internal
+
+  db:
+    image: postgres:11.5
+    container_name: ${INSTANCE}_db
+    restart: always
+    hostname: ${INSTANCE}_db
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - internal
+
+volumes:
+  db-data:
+  static:
+  media:
+
+networks:
+  nginx-proxy:
+    external:
+      name: nginx-proxy
+  internal:
+    external: false
